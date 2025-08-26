@@ -239,30 +239,36 @@ body {
 }
 
 /* Sección 1: 270° a 30° (cruza el 0°) - ROJO */
+/* Sección 1: 0° a 120° (superior) - ROJO */
 .zone-1 {
-    background: conic-gradient(from 270deg,
-            rgba(255, 0, 0, 0.3) 0deg,
-            rgba(255, 0, 0, 0.3) 120deg,
-            transparent 120deg,
-            transparent 240deg,
-            rgba(255, 0, 0, 0.3) 240deg,
-            rgba(255, 0, 0, 0.3) 360deg);
+    background: conic-gradient(
+        rgba(255, 0, 0, 0.3) 0deg, 
+        rgba(255, 0, 0, 0.3) 120deg, 
+        transparent 120deg, 
+        transparent 360deg
+    );
 }
 
-/* Sección 2: 30° a 150° (derecha) - AZUL */
+/* Sección 2: 120° a 240° (inferior derecha) - AZUL */
 .zone-2 {
-    background: conic-gradient(from 30deg,
-            rgba(0, 0, 255, 0.3) 0deg,
-            rgba(0, 0, 255, 0.3) 120deg,
-            transparent 120deg);
+    background: conic-gradient(
+        transparent 0deg, 
+        transparent 120deg, 
+        rgba(0, 0, 255, 0.3) 120deg, 
+        rgba(0, 0, 255, 0.3) 240deg, 
+        transparent 240deg, 
+        transparent 360deg
+    );
 }
 
-/* Sección 3: 150° a 270° (izquierda) - VERDE */
+/* Sección 3: 240° a 360° (inferior izquierda) - VERDE */
 .zone-3 {
-    background: conic-gradient(from 150deg,
-            rgba(0, 255, 0, 0.3) 0deg,
-            rgba(0, 255, 0, 0.3) 120deg,
-            transparent 120deg);
+    background: conic-gradient(
+        transparent 0deg, 
+        transparent 240deg, 
+        rgba(0, 255, 0, 0.3) 240deg, 
+        rgba(0, 255, 0, 0.3) 360deg
+    );
 }
 
 .pepperoni {
