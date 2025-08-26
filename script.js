@@ -151,7 +151,7 @@ function handleTouchMove(e) {
     const touch = e.touches[0];
     draggedElement.style.position = 'fixed';
     draggedElement.style.left = (touch.clientX - 14) + 'px';
-    draggedElement.style.top = (touch.clientY - 14) + 'px';
+    draggedElement.style.top = (touch.clientY - 40) + 'px'; // antes -14 → ahora más arriba
     draggedElement.style.zIndex = '1000';
 }
 
@@ -161,33 +161,48 @@ function handleTouchEnd(e) {
     const touch = e.changedTouches[0];
     const pizza = document.querySelector('.pizza');
     const rect = pizza.getBoundingClientRect();
+    const centerX = rect.width / 2;
+    const centerY = rect.height / 2;
 
-    // Verificar si el toque terminó sobre la pizza
-    if (touch.clientX >= rect.left && touch.clientX <= rect.right &&
-        touch.clientY >= rect.top && touch.clientY <= rect.bottom) {
+    const x = touch.clientX - rect.left - 14;
+    const y = touch.clientY - rect.top - 14;
 
-        const x = touch.clientX - rect.left - 14;
-        const y = touch.clientY - rect.top - 14;
+    if (isValidPosition(x + 14, y + 14, centerX, centerY)) {
+        // SNAP automático
+        const section = getSection(x, y, centerX, centerY);
+        let snapAngle;
 
-        if (isValidPosition(x + 14, y + 14, rect.width / 2, rect.height / 2)) {
-            placePepperoni(x, y);
-        } else {
-            showFeedback('Posición no válida para el pepperoni', 'error');
-        }
+        if (section === 1) snapAngle = 0;   // arriba
+        if (section === 2) snapAngle = 120; // derecha
+        if (section === 3) snapAngle = 240; // izquierda
+
+        const radius = rect.width * 0.35;
+        const snapX = centerX + Math.cos(snapAngle * Math.PI / 180) * radius - 14;
+        const snapY = centerY + Math.sin(snapAngle * Math.PI / 180) * radius - 14;
+
+        placePepperoni(snapX, snapY);
+    } else {
+        showFeedback('Posición no válida para el pepperoni', 'error');
     }
 
-    // Limpiar
-    draggedElement.classList.remove('dragging');
-    draggedElement.style.position = '';
-    draggedElement.style.left = '';
-    draggedElement.style.top = '';
-    draggedElement.style.zIndex = '';
-    draggedElement = null;
+    resetDraggedElement();
+}
+
+function resetDraggedElement() {
+    if (draggedElement) {
+        draggedElement.classList.remove('dragging');
+        draggedElement.style.position = '';
+        draggedElement.style.left = '';
+        draggedElement.style.top = '';
+        draggedElement.style.zIndex = '';
+        draggedElement = null;
+    }
 
     document.querySelectorAll('.zone-highlight').forEach(zone => {
         zone.classList.remove('active');
     });
 }
+
 
 // Configurar pizza como zona de drop
 const pizza = document.querySelector('.pizza');
@@ -215,8 +230,8 @@ pizza.addEventListener('drop', function (e) {
 
 function isValidPosition(x, y, centerX, centerY) {
     const distanceFromCenter = Math.sqrt(Math.pow(x - centerX, 2) + Math.pow(y - centerY, 2));
-    const pizzaRadius = centerX * 0.85;
-    const centerRadius = pizzaRadius * 0.35;
+    const pizzaRadius = centerX * 0.9;   // antes 0.85
+    const centerRadius = pizzaRadius * 0.25; // antes 0.35 → agranda zona útil
 
     return distanceFromCenter > centerRadius && distanceFromCenter < pizzaRadius;
 }
@@ -543,4 +558,4 @@ document.addEventListener('touchmove', function (e) {
 }, { passive: false });
 
 // Inicializar
-initGame();
+// initGame();
