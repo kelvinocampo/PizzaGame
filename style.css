@@ -147,18 +147,6 @@ body {
     box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5), inset 0 5px 15px rgba(255, 255, 255, 0.2);
 }
 
-.pizza::before {
-    content: '';
-    position: absolute;
-    top: 10%;
-    left: 10%;
-    width: 80%;
-    height: 80%;
-    background: radial-gradient(circle at 40% 40%, rgba(255, 193, 7, 0.3), transparent 70%);
-    border-radius: 50%;
-    z-index: 1;
-}
-
 .cheese-texture {
     position: absolute;
     top: 0;
@@ -175,6 +163,7 @@ body {
     z-index: 1;
 }
 
+/* LÍNEAS DEL RELOJ - Coinciden con el JavaScript */
 .clock-lines {
     position: absolute;
     top: 0;
@@ -191,30 +180,89 @@ body {
     box-shadow: 0 0 3px rgba(0, 0, 0, 0.3);
 }
 
+/* Línea 12: De centro hacia arriba (270° - 12 en punto) */
 .line-12 {
-    top: -2px;
+    top: 0;
     left: 50%;
     width: 3px;
     height: 50%;
     transform: translateX(-50%);
 }
 
+/* Línea 4: De centro hacia 30° (2 en punto del reloj) */
 .line-4 {
     top: 50%;
-    right: -2px;
-    width: 50%;
-    height: 3px;
-    transform: translateY(-50%) rotate(30deg);
-    transform-origin: left center;
-}
-
-.line-8 {
-    bottom: -2px;
     left: 50%;
     width: 50%;
     height: 3px;
-    transform: translateX(-50%) translateY(50%) rotate(-30deg);
-    transform-origin: right center;
+    transform-origin: left center;
+    transform: rotate(30deg);
+}
+
+/* Línea 8: De centro hacia 150° (10 en punto del reloj) */
+.line-8 {
+    top: 50%;
+    left: 50%;
+    width: 50%;
+    height: 3px;
+    transform-origin: left center;
+    transform: rotate(150deg);
+}
+
+/* ZONAS CORREGIDAS - Ahora coinciden PERFECTAMENTE con las líneas */
+.zone-highlight {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    z-index: 2;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.4s ease;
+}
+
+.zone-highlight.active {
+    opacity: 0.4;
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+
+    0%,
+    100% {
+        opacity: 0.4;
+    }
+
+    50% {
+        opacity: 0.6;
+    }
+}
+
+/* Sección 1: 270° a 30° (cruza el 0°) - ROJO */
+.zone-1 {
+    background: conic-gradient(from 270deg,
+            rgba(255, 0, 0, 0.3) 0deg,
+            rgba(255, 0, 0, 0.3) 120deg,
+            transparent 120deg,
+            transparent 240deg,
+            rgba(255, 0, 0, 0.3) 240deg,
+            rgba(255, 0, 0, 0.3) 360deg);
+}
+
+/* Sección 2: 30° a 150° (derecha) - AZUL */
+.zone-2 {
+    background: conic-gradient(from 30deg,
+            rgba(0, 0, 255, 0.3) 0deg,
+            rgba(0, 0, 255, 0.3) 120deg,
+            transparent 120deg);
+}
+
+/* Sección 3: 150° a 270° (izquierda) - VERDE */
+.zone-3 {
+    background: conic-gradient(from 150deg,
+            rgba(0, 255, 0, 0.3) 0deg,
+            rgba(0, 255, 0, 0.3) 120deg,
+            transparent 120deg);
 }
 
 .pepperoni {
@@ -259,46 +307,6 @@ body {
     z-index: 10;
     transform: scale(1.3) rotate(15deg);
     box-shadow: 0 10px 20px rgba(0, 0, 0, 0.6);
-}
-
-.zone-highlight {
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    border-radius: 50%;
-    z-index: 2;
-    pointer-events: none;
-    opacity: 0;
-    transition: opacity 0.4s ease;
-}
-
-.zone-highlight.active {
-    opacity: 0.4;
-    animation: pulse 2s infinite;
-}
-
-@keyframes pulse {
-
-    0%,
-    100% {
-        opacity: 0.4;
-    }
-
-    50% {
-        opacity: 0.6;
-    }
-}
-
-.zone-1 {
-    background: conic-gradient(from 270deg, rgba(255, 0, 0, 0.3) 0deg 120deg, transparent 120deg);
-}
-
-.zone-2 {
-    background: conic-gradient(from 30deg, rgba(0, 0, 255, 0.3) 0deg 120deg, transparent 120deg);
-}
-
-.zone-3 {
-    background: conic-gradient(from 150deg, rgba(0, 255, 0, 0.3) 0deg 120deg, transparent 120deg);
 }
 
 .controls {
@@ -454,6 +462,7 @@ button:active {
     box-shadow: 0 8px 25px rgba(255, 152, 0, 0.3);
 }
 
+/* NÚMEROS DE SECCIÓN */
 .section-numbers {
     position: absolute;
     width: 100%;
@@ -491,22 +500,27 @@ button:active {
     }
 }
 
+/* Sección 1: Parte superior (270° - 30°) */
 .section-1 {
-    top: 10%;
-    left: 50%;
+    top: 30%;
+    left: 70%;
     transform: translateX(-50%);
     animation-delay: 0s;
 }
 
+/* Sección 2: Parte derecha (30° - 150°) */
 .section-2 {
-    top: 55%;
-    right: 8%;
+    top: 70%;
+    right: 50%;
+    transform: translateY(-50%);
     animation-delay: 1s;
 }
 
+/* Sección 3: Parte izquierda (150° - 270°) */
 .section-3 {
-    top: 55%;
-    left: 8%;
+    top: 30%;
+    left: 15%;
+    transform: translateY(-50%);
     animation-delay: 2s;
 }
 
@@ -584,37 +598,6 @@ button:active {
     margin: 10px 0;
 }
 
-@media (max-width: 768px) {
-    .game-container {
-        flex-direction: column;
-        align-items: center;
-        gap: 30px;
-    }
-
-    .pizza-container {
-        width: 350px;
-        height: 350px;
-    }
-
-    .header h1 {
-        font-size: 2.5em;
-    }
-
-    .controls {
-        min-width: auto;
-        width: 100%;
-        max-width: 350px;
-    }
-
-    .buttons {
-        flex-direction: column;
-    }
-
-    button {
-        width: 100%;
-    }
-}
-
 .pizza-drop-zone {
     position: absolute;
     top: 0;
@@ -662,90 +645,100 @@ button:active {
     right: 20px;
 }
 
-/* 📱 OPTIMIZACIÓN PARA MÓVIL */
+/* RESPONSIVE DESIGN */
+@media (max-width: 768px) {
+    .game-container {
+        flex-direction: column;
+        align-items: center;
+        gap: 30px;
+    }
+
+    .pizza-container {
+        width: 350px;
+        height: 350px;
+    }
+
+    .header h1 {
+        font-size: 2.5em;
+    }
+
+    .controls {
+        min-width: auto;
+        width: 100%;
+        max-width: 350px;
+    }
+
+    .buttons {
+        flex-direction: column;
+    }
+
+    button {
+        width: 100%;
+    }
+}
+
 @media (max-width: 600px) {
+    body {
+        padding: 10px;
+    }
 
-  body {
-    padding: 10px;
-  }
+    .header {
+        margin-bottom: 15px;
+    }
 
-  .header {
-    margin-bottom: 15px;
-  }
+    .instructions {
+        padding: 15px;
+        margin-bottom: 20px;
+    }
 
-  .instructions {
-    padding: 15px;
-    margin-bottom: 20px;
-  }
+    .game-container {
+        flex-direction: column;
+        align-items: center;
+        gap: 20px;
+    }
 
-  .game-container {
-    flex-direction: column;
-    align-items: center;
-    gap: 20px;
-  }
+    .pizza-container {
+        width: 280px;
+        height: 280px;
+        order: 1;
+    }
 
-  .pizza-container {
-    width: 280px;   /* antes 350px */
-    height: 280px;
-  }
+    #pepperoni-bank {
+        order: 2;
+        margin-top: 10px;
+        width: 100%;
+        max-width: 300px;
+        min-height: 80px;
+        padding: 10px;
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 8px;
+    }
 
-  .controls {
-    width: 100%;
-    max-width: 300px;
-    gap: 15px;
-  }
+    .controls {
+        order: 3;
+        width: 100%;
+        max-width: 320px;
+        margin-top: 15px;
+        gap: 15px;
+    }
 
-  .score-board {
-    padding: 15px;
-  }
+    .score-board {
+        padding: 15px;
+    }
 
-  #pepperoni-bank {
-    padding: 15px;
-    min-height: 100px;
-  }
+    button {
+        width: 100%;
+        padding: 12px;
+        font-size: 14px;
+    }
 
-  button {
-    width: 100%;
-    padding: 12px;
-    font-size: 14px;
-  }
+    .header h1 {
+        font-size: 1.8em;
+    }
 
-  .header h1 {
-    font-size: 1.8em;
-  }
-
-  .header p {
-    font-size: 1em;
-  }
-  
-  .game-container {
-    flex-direction: column;
-    align-items: center;
-  }
-
-  .pizza-container {
-    order: 1;
-    width: 280px;
-    height: 280px;
-  }
-
-  #pepperoni-bank {
-    order: 2;
-    margin-top: 10px;
-    width: 100%;
-    max-width: 300px;
-    min-height: 80px;
-    padding: 10px;
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 8px;
-  }
-
-  .controls {
-    order: 3;
-    width: 100%;
-    max-width: 320px;
-    margin-top: 15px;
-  }
+    .header p {
+        font-size: 1em;
+    }
 }
