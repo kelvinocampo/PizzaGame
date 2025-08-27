@@ -241,34 +241,28 @@ body {
 /* Sección 1: 270° a 30° (cruza el 0°) - ROJO */
 /* Sección 1: 0° a 120° (superior) - ROJO */
 .zone-1 {
-    background: conic-gradient(
-        rgba(255, 0, 0, 0.3) 0deg, 
-        rgba(255, 0, 0, 0.3) 120deg, 
-        transparent 120deg, 
-        transparent 360deg
-    );
+    background: conic-gradient(rgba(255, 0, 0, 0.3) 0deg,
+            rgba(255, 0, 0, 0.3) 120deg,
+            transparent 120deg,
+            transparent 360deg);
 }
 
 /* Sección 2: 120° a 240° (inferior derecha) - AZUL */
 .zone-2 {
-    background: conic-gradient(
-        transparent 0deg, 
-        transparent 120deg, 
-        rgba(0, 0, 255, 0.3) 120deg, 
-        rgba(0, 0, 255, 0.3) 240deg, 
-        transparent 240deg, 
-        transparent 360deg
-    );
+    background: conic-gradient(transparent 0deg,
+            transparent 120deg,
+            rgba(0, 0, 255, 0.3) 120deg,
+            rgba(0, 0, 255, 0.3) 240deg,
+            transparent 240deg,
+            transparent 360deg);
 }
 
 /* Sección 3: 240° a 360° (inferior izquierda) - VERDE */
 .zone-3 {
-    background: conic-gradient(
-        transparent 0deg, 
-        transparent 240deg, 
-        rgba(0, 255, 0, 0.3) 240deg, 
-        rgba(0, 255, 0, 0.3) 360deg
-    );
+    background: conic-gradient(transparent 0deg,
+            transparent 240deg,
+            rgba(0, 255, 0, 0.3) 240deg,
+            rgba(0, 255, 0, 0.3) 360deg);
 }
 
 .pepperoni {
@@ -491,7 +485,7 @@ button:active {
     font-size: 18px;
     color: #d32f2f;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-    animation: float 3s ease-in-out infinite;
+    /* animation: float 3s ease-in-out infinite; */
 }
 
 @keyframes float {
@@ -517,16 +511,16 @@ button:active {
 /* Sección 2: Parte derecha (30° - 150°) */
 .section-2 {
     top: 70%;
-    right: 50%;
-    transform: translateY(-50%);
+    left: 50%;
+    transform: translateX(-50%);
     animation-delay: 1s;
 }
 
 /* Sección 3: Parte izquierda (150° - 270°) */
 .section-3 {
     top: 30%;
-    left: 15%;
-    transform: translateY(-50%);
+    left: 30%;
+    transform: translateX(-50%);
     animation-delay: 2s;
 }
 
