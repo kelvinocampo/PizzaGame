@@ -264,6 +264,19 @@ body {
             rgba(0, 255, 0, 0.3) 240deg,
             rgba(0, 255, 0, 0.3) 360deg);
 }
+/* 
+.pepperoni {
+    position: absolute;
+    width: 28px;
+    height: 28px;
+    background: radial-gradient(circle at 30% 30%, #cc0000, #8b0000, #660000);
+    border-radius: 50%;
+    border: 3px solid #4a0000;
+    z-index: 5;
+    cursor: grab;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4), inset 0 2px 4px rgba(255, 255, 255, 0.2);
+} */
 
 .pepperoni {
     position: absolute;
@@ -276,7 +289,9 @@ body {
     cursor: grab;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4), inset 0 2px 4px rgba(255, 255, 255, 0.2);
+    /* ❌ no poner transform: translate(-50%, -50%) aquí */
 }
+
 
 .pepperoni::before {
     content: '';
