@@ -191,30 +191,38 @@ function handleTouchEnd(e) {
     }
 
     e.preventDefault();
-    
+
     const touch = e.changedTouches[0];
     const pizza = document.querySelector('.pizza');
-    
     if (!pizza) {
         resetDraggedElement();
         return;
     }
-    
+
     const pizzaRect = pizza.getBoundingClientRect();
-    const centerX = pizzaRect.width / 2;
-    const centerY = pizzaRect.height / 2;
+    // Verifica si el punto final del touch está dentro de la pizza
+    if (
+        touch.clientX >= pizzaRect.left &&
+        touch.clientX <= pizzaRect.right &&
+        touch.clientY >= pizzaRect.top &&
+        touch.clientY <= pizzaRect.bottom
+    ) {
+        const centerX = pizzaRect.width / 2;
+        const centerY = pizzaRect.height / 2;
+        const x = touch.clientX - pizzaRect.left;
+        const y = touch.clientY - pizzaRect.top;
 
-    const x = touch.clientX - pizzaRect.left;
-    const y = touch.clientY - pizzaRect.top;
-
-    if (isValidPosition(x, y, centerX, centerY)) {
-        const pepperoniSize = 28;
-        const adjustedX = x - pepperoniSize / 2;
-        const adjustedY = y - pepperoniSize / 2;
-        
-        placePepperoniAt(adjustedX, adjustedY);
+        if (isValidPosition(x, y, centerX, centerY)) {
+            const pepperoniSize = 28;
+            const adjustedX = x - pepperoniSize / 2;
+            const adjustedY = y - pepperoniSize / 2;
+            placePepperoniAt(adjustedX, adjustedY);
+        } else {
+            showFeedback('Posición no válida para el pepperoni', 'error');
+            resetDraggedElement();
+        }
     } else {
-        showFeedback('Posición no válida para el pepperoni', 'error');
+        // Si el usuario suelta fuera de la pizza, regresa el pepperoni al banco
         resetDraggedElement();
     }
 }
