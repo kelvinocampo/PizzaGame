@@ -225,7 +225,8 @@ function setDifficulty(level) {
 }
 
 function startTimer() {
-    if (timerInterval || gameStarted) return;
+    if (timerInterval) clearInterval(timerInterval);
+    if (gameStarted) return;
 
     gameTimer = difficultySettings[difficulty].time;
     gameStarted = true;
@@ -246,13 +247,11 @@ function startTimer() {
 function updateTimerDisplay() {
     const minutes = Math.floor(gameTimer / 60);
     const seconds = gameTimer % 60;
-    const timeString = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-    
-    safeUpdateElement('timer', 'textContent', timeString);
-    
-    // Cambiar color cuando queda poco tiempo
-    const timerEl = safeGetElement('timer');
+    const timerEl = document.getElementById('timer');
+
     if (timerEl) {
+        timerEl.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+
         if (gameTimer <= 30) {
             timerEl.style.color = '#f44336';
             timerEl.style.animation = 'pulse 1s infinite';
@@ -268,7 +267,6 @@ function endGame() {
     const finalScore = calculateFinalScore();
     showFeedback(`¡Tiempo agotado! Puntuación final: ${finalScore}`, 'warning');
 
-    // Desactivar interacciones
     document.querySelectorAll('.pepperoni').forEach(p => {
         p.style.opacity = '0.7';
         p.style.pointerEvents = 'none';
@@ -298,14 +296,215 @@ function createPepperoni() {
     const pepperoni = document.createElement('div');
     pepperoni.className = 'pepperoni bank-pepperoni'; // Mantener clase específica del banco
     pepperoni.id = `pepperoni-${pepperoniCount++}`;
-    pepperoni.style.cssText = `
-        position: relative;
-        margin: 5px;
-        cursor: grab;
-    `;
 
-    // Los efectos hover ya están en CSS, no necesitamos JS
+    pepperoni.addEventListener('dragstart', handleDragStart);
+    pepperoni.addEventListener('dragend', handleDragEnd);
+
+    pepperoni.addEventListener('touchstart', handleTouchStart, { passive: false });
+    pepperoni.addEventListener('touchmove', handleTouchMove, { passive: false });
+    pepperoni.addEventListener('touchend', handleTouchEnd, { passive: false });
+
     return pepperoni;
+}
+
+// ===== EVENTOS DE ESCRITORIO =====
+function handleDragStart(e) {
+    if (!gameStarted) startTimer();
+
+    draggedElement = this;
+    this.classList.add('dragging');
+
+    document.querySelectorAll('.zone-highlight').forEach(zone => {
+        zone.classList.add('active');
+    });
+
+    e.dataTransfer.effectAllowed = 'move';
+    e.dataTransfer.setData('text/html', this.outerHTML);
+}
+
+function handleDragEnd(e) {
+    if (this.classList.contains('dragging')) {
+        this.classList.remove('dragging');
+    }
+
+    document.querySelectorAll('.zone-highlight').forEach(zone => {
+        zone.classList.remove('active');
+    });
+
+    if (draggedElement && !draggedElement.parentElement.classList.contains('pizza')) {
+        draggedElement = null;
+    }
+}
+
+// ===== EVENTOS TÁCTILES MEJORADOS =====
+function handleTouchStart(e) {
+    if (!gameStarted) startTimer();
+
+    const touch = e.touches[0];
+    const rect = this.getBoundingClientRect();
+
+    touchOffset.x = touch.clientX - rect.left;
+    touchOffset.y = touch.clientY - rect.top;
+
+    draggedElement = this;
+    this.classList.add('dragging');
+
+    this.style.position = 'fixed';
+    this.style.zIndex = '1000';
+    this.style.pointerEvents = 'none';
+    this.style.left = (touch.clientX - touchOffset.x) + 'px';
+    this.style.top = (touch.clientY - touchOffset.y) + 'px';
+
+    document.querySelectorAll('.zone-highlight').forEach(zone => {
+        zone.classList.add('active');
+    });
+}
+
+function handleTouchMove(e) {
+    if (!gameStarted) startGame(e);
+    if (!draggedElement) return;
+
+    e.preventDefault();
+
+    const touch = e.touches[0];
+
+    draggedElement.style.left = (touch.clientX - touchOffset.x) + 'px';
+    draggedElement.style.top = (touch.clientY - touchOffset.y) + 'px';
+}
+
+function handleTouchEnd(e) {
+    if (!draggedElement || !gameStarted) {
+        // resetDraggedElement();
+        startGame(e);
+    }
+
+    e.preventDefault();
+
+    const touch = e.changedTouches[0];
+    const pizza = document.querySelector('.pizza');
+    if (!pizza) {
+        resetDraggedElement();
+        return;
+    }
+
+    const pizzaRect = pizza.getBoundingClientRect();
+    // Verifica si el punto final del touch está dentro de la pizza
+    if (
+        touch.clientX >= pizzaRect.left &&
+        touch.clientX <= pizzaRect.right &&
+        touch.clientY >= pizzaRect.top &&
+        touch.clientY <= pizzaRect.bottom
+    ) {
+        const centerX = pizzaRect.width / 2;
+        const centerY = pizzaRect.height / 2;
+        const x = touch.clientX - pizzaRect.left;
+        const y = touch.clientY - pizzaRect.top;
+
+        if (isValidPosition(x, y, centerX, centerY)) {
+            const pepperoniSize = 28;
+            const adjustedX = x - pepperoniSize / 2;
+            const adjustedY = y - pepperoniSize / 2;
+            placePepperoniAt(adjustedX, adjustedY);
+        } else {
+            showFeedback('Posición no válida para el pepperoni', 'error');
+            resetDraggedElement();
+        }
+    } else {
+        // Si el usuario suelta fuera de la pizza, regresa el pepperoni al banco
+        resetDraggedElement();
+    }
+}
+
+function resetDraggedElement() {
+    if (draggedElement) {
+        if (!draggedElement.parentElement.classList.contains('pizza')) {
+            draggedElement.style.position = '';
+            draggedElement.style.left = '';
+            draggedElement.style.top = '';
+        }
+
+        draggedElement.classList.remove('dragging');
+        draggedElement.style.zIndex = '';
+        draggedElement.style.pointerEvents = '';
+
+        draggedElement = null;
+    }
+
+    document.querySelectorAll('.zone-highlight').forEach(zone => {
+        zone.classList.remove('active');
+    });
+
+    touchOffset = { x: 0, y: 0 };
+}
+
+// ===== CONFIGURACIÓN DE LA PIZZA COMO ZONA DE DROP =====
+function setupPizzaDropZone() {
+    const pizza = document.querySelector('.pizza');
+    if (!pizza) return;
+
+    pizza.addEventListener('dragover', function (e) {
+        e.preventDefault();
+        e.dataTransfer.dropEffect = 'move';
+    });
+
+    pizza.addEventListener('drop', function (e) {
+        e.preventDefault();
+
+        if (draggedElement && gameStarted) {
+            const rect = this.getBoundingClientRect();
+            const x = e.clientX - rect.left - 14;
+            const y = e.clientY - rect.top - 14;
+
+            if (isValidPosition(x + 14, y + 14, rect.width / 2, rect.height / 2)) {
+                placePepperoniAt(x, y);
+            } else {
+                showFeedback('No puedes colocar pepperonis en el centro o fuera de la pizza', 'error');
+                resetDraggedElement();
+            }
+        }
+    });
+}
+
+function isValidPosition(x, y, centerX, centerY) {
+    const distanceFromCenter = Math.sqrt(Math.pow(x - centerX, 2) + Math.pow(y - centerY, 2));
+    const pizzaRadius = centerX * 0.9;
+    const centerRadius = pizzaRadius * 0.25;
+
+    return distanceFromCenter > centerRadius && distanceFromCenter < pizzaRadius;
+}
+
+function placePepperoniAt(x, y) {
+    if (!draggedElement) return;
+
+    const pizza = document.querySelector('.pizza');
+    if (!pizza) return;
+
+    // Reutilizar el mismo pepperoni en lugar de crear uno nuevo
+    draggedElement.style.position = 'absolute';
+    draggedElement.style.left = x + 'px';
+    draggedElement.style.top = y + 'px';
+    draggedElement.style.margin = '0';
+
+    // Si no está ya en la pizza, lo movemos allí
+    if (!draggedElement.parentElement.classList.contains('pizza')) {
+        pizza.appendChild(draggedElement);
+    }
+
+    placedPepperonis++;
+    updateScore();
+    checkAchievements();
+    showFeedback('¡Pepperoni colocado correctamente!', 'success');
+    playSound('place');
+
+    draggedElement.classList.remove('dragging');
+    draggedElement.style.zIndex = '';
+    draggedElement.style.pointerEvents = '';
+
+    draggedElement = null;
+
+    document.querySelectorAll('.zone-highlight').forEach(zone => {
+        zone.classList.remove('active');
+    });
 }
 
 function removePepperoni() {
@@ -317,9 +516,8 @@ function removePepperoni() {
     showFeedback('Pepperoni removido', 'warning');
     playSound('remove');
 
-    // Devolver pepperoni al banco
-    const bank = safeGetElement('pepperoni-bank');
-    if (bank && bank.querySelectorAll('.pepperoni').length < difficultySettings[difficulty].pepperonis) {
+    const bank = document.getElementById('pepperoni-bank');
+    if (bank) {
         const pepperoni = createPepperoni();
         bank.appendChild(pepperoni);
     }
@@ -331,14 +529,11 @@ function getSection(x, y, centerX, centerY) {
     const deltaY = y - centerY;
 
     let angle = Math.atan2(deltaY, deltaX) * 180 / Math.PI;
-    angle = (angle + 360) % 360; // Normalizar a 0-360
+    angle = (angle + 360) % 360;
 
-    // Dividir en 3 secciones iguales de 120 grados cada una
-    if (angle >= 0 && angle < 120) return 1;     // 0-120°
-    if (angle >= 120 && angle < 240) return 2;   // 120-240°
-    if (angle >= 240 && angle < 360) return 3;   // 240-360°
-    
-    return 1; // Fallback por seguridad
+    if (angle >= 270 || angle < 30) return 1;
+    if (angle >= 30 && angle < 150) return 2;
+    if (angle >= 150 && angle < 270) return 3;
 }
 
 function checkDistribution() {
@@ -454,11 +649,15 @@ function updateScore() {
     const balance = calculateBalanceScore(sections, pepperonis.length);
     const progress = Math.min(100, (pepperonis.length / difficultySettings[difficulty].pepperonis) * 100);
 
-    // Actualizar elementos del DOM de forma segura
-    safeUpdateElement('placed', 'textContent', pepperonis.length);
-    safeUpdateElement('balance', 'textContent', Math.round(balance) + '%');
-    safeUpdateElement('score', 'textContent', calculateFinalScore());
-    safeUpdateElement('progress-fill', 'style', { width: progress + '%' });
+    const placedEl = document.getElementById('placed');
+    const balanceEl = document.getElementById('balance');
+    const scoreEl = document.getElementById('score');
+    const progressEl = document.getElementById('progress-fill');
+
+    if (placedEl) placedEl.textContent = pepperonis.length;
+    if (balanceEl) balanceEl.textContent = Math.round(balance) + '%';
+    if (scoreEl) scoreEl.textContent = calculateFinalScore();
+    if (progressEl) progressEl.style.width = progress + '%';
 }
 
 // ===================== FUNCIONES DE UTILIDAD =====================
@@ -572,19 +771,16 @@ function showFeedback(message, type) {
 }
 
 function resetGame() {
-    // Limpiar pizza
     const pizza = document.querySelector('.pizza');
     if (pizza) {
         pizza.querySelectorAll('.pepperoni').forEach(p => p.remove());
     }
 
-    // Limpiar banco
-    const bank = safeGetElement('pepperoni-bank');
+    const bank = document.getElementById('pepperoni-bank');
     if (bank) {
         bank.querySelectorAll('.pepperoni').forEach(p => p.remove());
     }
 
-    // Reiniciar contadores
     placedPepperonis = 0;
     pepperoniCount = 0;
     gameScore = 0;
@@ -592,7 +788,6 @@ function resetGame() {
     draggedElement = null;
     isDragging = false;
 
-    // Reiniciar timer
     if (timerInterval) {
         clearInterval(timerInterval);
         timerInterval = null;
@@ -601,29 +796,46 @@ function resetGame() {
     updateTimerDisplay();
     gameStarted = false;
 
-    // Agregar pepperonis según dificultad
     addPepperonis();
     updateScore();
 
     showFeedback('¡Juego reiniciado! Haz clic en cualquier lugar para comenzar.', 'success');
 }
 
-// ===================== EVENT LISTENERS PRINCIPALES =====================
-document.addEventListener('click', function (e) {
+function startGame(e) {
     if (!gameStarted &&
         e.target.tagName !== 'BUTTON' &&
         !e.target.classList.contains('difficulty-btn') &&
         !e.target.classList.contains('pepperoni')) {
         startTimer();
     }
-});
+}
 
-// ===================== INICIALIZACIÓN =====================
+// ===== EVENT LISTENERS =====
+document.addEventListener('click', startGame);
+
+document.addEventListener('touchmove', function (e) {
+    if (draggedElement) {
+        e.preventDefault();
+    }
+}, { passive: false });
+
+document.addEventListener('touchstart', function (e) {
+    if (draggedElement && !e.target.classList.contains('pepperoni')) {
+        e.preventDefault();
+    }
+}, { passive: false });
+
 document.addEventListener('DOMContentLoaded', function () {
     initGame();
 });
 
-// ===================== FUNCIONES GLOBALES =====================
+document.addEventListener('mouseleave', function () {
+    if (draggedElement) {
+        resetDraggedElement();
+    }
+});
+
 window.setDifficulty = setDifficulty;
 window.addPepperonis = addPepperonis;
 window.checkDistribution = checkDistribution;
