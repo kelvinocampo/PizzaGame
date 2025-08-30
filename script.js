@@ -154,6 +154,7 @@ function handleTouchStart(e) {
     draggedElement = this;
     this.classList.add('dragging');
 
+    this.style.opacity = '0';
     this.style.position = 'fixed';
     this.style.zIndex = '1000';
     this.style.pointerEvents = 'none';
@@ -187,6 +188,7 @@ function handleTouchEnd(e) {
 
     const touch = e.changedTouches[0];
     const pizza = document.querySelector('.pizza');
+    this.style.opacity = '1';
     if (!pizza) {
         resetDraggedElement();
         return;
